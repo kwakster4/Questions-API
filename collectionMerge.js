@@ -8,4 +8,7 @@ const Photo = mongoose.model('Photo', schemas.photoSchema, 'answer_photos');
 const PreAnswer = mongoose.model('PreAnswer', schemas.answerSchema, 'preanswers');
 // PreAnswer.findOne().then((res)=>{console.log(res)});
 const PreQuestion = mongoose.model('PreQuestion', schemas.questionSchema, 'prequestions');
-PreQuestion.findOne().then((res)=>{console.log(res)});
+// PreQuestion.findOne().then((res)=>{console.log(res)});
+const Answer = mongoose.model('Answer', schemas.answerPhotoSchema, 'answers');
+const Question = mongoose.model('Question', schemas.qaSchema, 'prequestions');
+
