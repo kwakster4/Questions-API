@@ -15,9 +15,10 @@ const Question = mongoose.model('Question', schemas.questionSchema, 'questions')
 // maybe aggregate to every unique answer_id in answer collection? aggregate
 // javascript memory heap exceeded with $project only.
 Photo.aggregate([{$limit: 10},{$group: {_id: '$answer_id', photos: {$push: {id: '$id', url: '$url'}}}}]).allowDiskUse(true)
-  .then((answerIds)=>{
-    for (let answerId of answerIds) {
-      console.log(answerId);
+  .then((photos)=>{
+    for (let photo of photos) {
+      console.log(photo);
+      // for each photo, find Answer doc corresponding to photo._id, and then update their photos with photo.photos
     }
   })
   .catch((err)=>{console.log(err)});
