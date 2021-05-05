@@ -4,35 +4,35 @@ const schemas = require('./schemas');
 mongoose.connect('mongodb://localhost/sdc_q_a', {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true});
 
 const Photo = mongoose.model('Photo', schemas.photoSchema, 'answer_photos');
-// Photo.findOne().then((res)=>{console.log(res)});
 const Answer = mongoose.model('Answer', schemas.answerSchema, 'answers');
-// Answer.findOne().then((res)=>{console.log('answer: ', res)});
 const Question = mongoose.model('Question', schemas.questionSchema, 'questions');
-// Question.findOne().then((res)=>{console.log('question: ',res)});
 
-
-// for every answer in collection, Answer.find() does not work.
-// maybe aggregate to every unique answer_id in answer collection? aggregate
-// javascript memory heap exceeded with $project only.
 Photo.aggregate([{$limit: 10},{$group: {_id: '$answer_id', photos: {$push: {id: '$id', url: '$url'}}}}]).allowDiskUse(true)
   .then((photos)=>{
+    let answerBulk = Answer.collection.initializeUnorderedBulkOp();
+    // let answerUpdates = [];
     for (let photo of photos) {
-      console.log(photo);
-      // for each photo, find Answer doc corresponding to photo._id, and then update their photos with photo.photos
+      answerBulk.find({'id': photo._id}).updateOne({"$set": {'photos': photo.photos}});
+
     }
+    console.log('executing answerBulk');
+    return answerBulk.execute();
+  })
+  .then(()=> {
+    return Answer.aggregate([{$limit: 10},{$group: {_id: '$question_id', answers: {$push: {answer_id: '$id', date: '$date_written', body: '$body', answerer_name: '$answerer_name', helpfulness: '$helpful', reported: '$reported', photos: '$photos'}}}}]).allowDiskUse(true)
+  })
+  .then((answers)=>{
+    let questionBulk = Question.collection.initializeUnorderedBulkOp();
+    for (let answer of answers) {
+      questionBulk.find({'id': answer._id}).updateOne({"$set": {'answers': answer.answers}});
+    }
+    console.log('executing questionBulk');
+    return questionBulk.execute();
+  })
+  .then(()=>{
+    console.log('completed ETL!');
   })
   .catch((err)=>{console.log(err)});
-  // find and aggregate photos where photo.answer_id = preanswer.id
-  // set those photos in an array
-  // update document with photoArray as photos
-  // then
-  // for every question in collection
-    // find and aggregate answers where answer.question_id = question.id
-    // set those answers in an array
-    // update document with answerArray as answers
-
-
-
 /*
  photo = {
   "_id" : ObjectId("6092d18631817e4926e07699"),
@@ -63,3 +63,8 @@ Photo.aggregate([{$limit: 10},{$group: {_id: '$answer_id', photos: {$push: {id: 
   "helpful" : 1
 }
 */
+// Instead of bulk, promises?
+// let updatePromise = Answer.findOneAndUpdate({"id": photo._id}, { "$set": {"photos": photo.photos }});
+      // answerUpdates.push(updatePromise);
+      // update document with photoArray as photos
+      // for each photo, find Answer doc corresponding to photo._id, and then update their photos with photo.photos
