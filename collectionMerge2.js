@@ -7,20 +7,20 @@ const Photo = mongoose.model('Photo', schemas.photoSchema, 'answer_photos');
 const Answer = mongoose.model('Answer', schemas.answerSchema, 'answers');
 const Question = mongoose.model('Question', schemas.questionSchema, 'questions');
 // {$limit: 10},
-Photo.aggregate([{$group: {_id: '$answer_id', allPhotos: {$push: {id: '$id'}}}}]).allowDiskUse(true)
+Photo.aggregate([{$group: {_id: '$answer_id', photos: {$push: {id: '$id'}}}}]).allowDiskUse(true)
   .then((allPhotos)=>{
     console.log('aggregated photo');
     let answerBulk = Answer.collection.initializeUnorderedBulkOp();
     // let answerUpdates = [];
     for (let photo of allPhotos) {
       let photosArray = photo.photos.map((photo_id)=> {
-        return Photo.findOne('id': photo_id);
+        return Photo.findOne({'id': photo_id});
       })
       Promise.all(photosArray)
         .then((photos)=> {
-          answerBulk.find({'id': photo._id}).updateOne({"$set": {'photos': photos}}
-        })
-      );
+          answerBulk.find({'id': photo._id}).updateOne({"$set": {'photos': photos}});
+        });
+        // point of concern here, answerBulk executes synchronously, but bulk command is set asynchronously
     }
     console.log('executing answerBulk');
     return answerBulk.execute();
