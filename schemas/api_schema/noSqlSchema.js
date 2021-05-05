@@ -11,10 +11,11 @@ let questionSchema = {
   "question_date": String,
   "asker_name": String,
   "question_helpfulness": Number,
-  "reported": false,
+  "reported": Boolean,
   // should I have answerSchema inside questionSchema?
-  answers: [answerSchema]
+  "answers": [answerSchema]
 };
+
 let answerSchema = {
   "question_id": Number,
   "answer_id": Number,
@@ -26,8 +27,8 @@ let answerSchema = {
   // photos is an array of objects with id and urls.
   "photos": [photoSchema]
 };
-let photoSchema = {
-    "id": Number,
-    "answer_id": Number,
-    "url": String
-}
+// let photoSchema = {
+//     "id": Number,
+//     "answer_id": Number,
+//     "url": String
+// }
