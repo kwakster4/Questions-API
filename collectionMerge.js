@@ -5,12 +5,10 @@ mongoose.connect('mongodb://localhost/sdc_q_a', {useNewUrlParser: true, useUnifi
 
 const Photo = mongoose.model('Photo', schemas.photoSchema, 'answer_photos');
 // Photo.findOne().then((res)=>{console.log(res)});
-const PreAnswer = mongoose.model('PreAnswer', schemas.answerPhotoSchema, 'preanswers');
-PreAnswer.findOne().then((res)=>{console.log(res)});
-const PreQuestion = mongoose.model('PreQuestion', schemas.qaSchema, 'prequestions');
-PreQuestion.findOne().then((res)=>{console.log(res)});
-// const Answer = mongoose.model('Answer', schemas.answerPhotoSchema, 'answers');
-// const Question = mongoose.model('Question', schemas.qaSchema, 'prequestions');
+const Answer = mongoose.model('Answer', schemas.answerSchema, 'answers');
+Answer.findOne().then((res)=>{console.log('answer: ', res)});
+const Question = mongoose.model('Question', schemas.questionSchema, 'questions');
+// Question.findOne().then((res)=>{console.log('question: ',res)});
 
 
 // for every answer in collection,

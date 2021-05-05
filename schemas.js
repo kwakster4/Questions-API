@@ -10,14 +10,15 @@ const photoSchema = ({
 
 const answerSchema = new mongoose.Schema({
   "question_id": Number,
-  "answer_id": {
+  "id": {
     type: Number,
     unique: true
   },
   "body": String,
-  "date": String,
+  "date_written": String,
   "answerer_name": String,
-  "helpfulness": Number,
+  "answerer_email": String,
+  "helpful": Number,
   "reported": Boolean,
   // photos is an array of objects with id and urls.
   "photos": [photoSchema]
@@ -25,14 +26,15 @@ const answerSchema = new mongoose.Schema({
 
 const questionSchema = new mongoose.Schema({
   "product_id": Number,
-  "question_id": {
+  "id": {
     type: Number,
     unique: true
   },
-  "question_body": String,
-  "question_date": String,
+  "body": String,
+  "date_written": String,
   "asker_name": String,
-  "question_helpfulness": Number,
+  "asker_email": String,
+  "helpful": Number,
   "reported": Boolean,
   // should I have answerSchema inside questionSchema?
   "answers": [answerSchema]
