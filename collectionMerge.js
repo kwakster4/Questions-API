@@ -1,36 +1,56 @@
 const mongoose = require('mongoose');
 const schemas = require('./schemas');
 
-mongoose.connect('mongodb://localhost/sdc_q_a', {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true});
+mongoose.connect('mongodb://localhost/sdc_q_a', {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: true});
 
 const Photo = mongoose.model('Photo', schemas.photoSchema, 'answer_photos');
 const Answer = mongoose.model('Answer', schemas.answerSchema, 'answers');
 const Question = mongoose.model('Question', schemas.questionSchema, 'questions');
 // {$limit: 10},
-Photo.aggregate([{$group: {_id: '$answer_id', photos: {$push: {id: '$id', url: '$url'}}}}]).allowDiskUse(true)
+Photo.aggregate([{$group: { _id: '$answer_id', photos: { $push: { id: '$id', url: '$url'}}}}]).allowDiskUse(true)
   .then((photos)=>{
     console.log('aggregated photo');
-    let answerBulk = Answer.collection.initializeUnorderedBulkOp();
-    // let answerUpdates = [];
-    for (let photo of photos) {
-      answerBulk.find({'id': photo._id}).updateOne({"$set": {'photos': photo.photos}});
-
+    // let answerBulk = Answer.collection.initializeUnorderedBulkOp();
+    // for (let photo of photos) {
+    //   answerBulk.find({'id': photo._id}).updateOne({"$set": {'photos': photo.photos}});
+    // }
+    for (let i = 0; i < photos.length; i++) {
+      let photo = photos[i];
+      Answer.findOneAndUpdate({"id": photo._id}, { "$set": {"photos": photo.photos }});
+      if (i === photos.length - 1) {
+        console.log('reached last photo findOneAndUpdate');
+        return Answer.findOneAndUpdate({"id": photo._id}, { "$set": {"photos": photo.photos }});
+      }
     }
-    console.log('executing answerBulk');
-    return answerBulk.execute();
+    // console.log('executing answerBulk');
+    // return answerBulk.execute();
   })
   .then(()=> {
+    console.log('aggregating answer');
     // {$limit: 10},
-    return Answer.aggregate([{$group: {_id: '$question_id', answers: {$push: {answer_id: '$id', date: '$date_written', body: '$body', answerer_name: '$answerer_name', helpfulness: '$helpful', reported: '$reported', photos: '$photos'}}}}]).allowDiskUse(true)
+    Answer.aggregate([{$group: {_id: '$question_id', answers: {$push: {answer_id: '$id', date: '$date_written', body: '$body', answerer_name: '$answerer_name', helpfulness: '$helpful', reported: '$reported', photos: '$photos'}}}}]).allowDiskUse(true);
+    // So from this experiment, the results show that the aggregation isn't the issue, the passing of the results from the aggregation to the next promise chain is the memory heap issue.
+    return;
   })
   .then((answers)=>{
-    console.log('aggregated answer');
-    let questionBulk = Question.collection.initializeUnorderedBulkOp();
-    for (let answer of answers) {
-      questionBulk.find({'id': answer._id}).updateOne({"$set": {'answers': answer.answers}});
-    }
-    console.log('executing questionBulk');
-    return questionBulk.execute();
+    // console.log('aggregated answer');
+    // let questionBulk = Question.collection.initializeUnorderedBulkOp();
+    // for (let answer of answers) {
+    //   questionBulk.find({'id': answer._id}).updateOne({"$set": {'answers': answer.answers}});
+    // }
+    // console.log('executing questionBulk');
+    // return questionBulk.execute();
+
+
+    // for (let i = 0; i < answers.length; i++) {
+    //   let answer = answers[i];
+    //   Question.findOneAndUpdate({"id": answer._id}, { "$set": {"answers": answer.answers }});
+    //   if (i === photos.length - 1) {
+    //     console.log('reached last photo findOneAndUpdate');
+    //     return Question.findOneAndUpdate({"id": answer._id}, { "$set": {"answers": answer.answers }});
+    //   }
+    // }
+    return;
   })
   .then(()=>{
     console.log('completed ETL!');

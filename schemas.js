@@ -1,15 +1,24 @@
 const mongoose = require('mongoose');
-const photoSchema = ({
+// use indexes on foreign keys to speed up lookup
+const photoSchema = new mongoose.Schema({
     "id": {
       type: Number,
       unique: true
     },
-    "answer_id": Number,
+    "answer_id": {
+      type: Number,
+      index: true
+    },
     "url": String
 });
 
+photoSchema.index({id: 1});
+
 const answerSchema = new mongoose.Schema({
-  "question_id": Number,
+  "question_id": {
+    type: Number,
+    index: true
+  },
   "id": {
     type: Number,
     unique: true
@@ -23,9 +32,13 @@ const answerSchema = new mongoose.Schema({
   // photos is an array of objects with id and urls.
   "photos": [photoSchema]
 });
+answerSchema.index({id: 1});
 
 const questionSchema = new mongoose.Schema({
-  "product_id": Number,
+  "product_id": {
+    type: Number,
+    index: true
+  },
   "id": {
     type: Number,
     unique: true
@@ -39,6 +52,7 @@ const questionSchema = new mongoose.Schema({
   // should I have answerSchema inside questionSchema?
   "answers": [answerSchema]
 });
+questionSchema.index({id: 1});
 module.exports = {photoSchema, answerSchema, questionSchema};
 
 // const preAnswerSchema = new mongoose.Schema({
