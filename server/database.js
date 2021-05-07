@@ -59,7 +59,23 @@ const setQ = function(newQ) {
 // getAs
 const getAs = function(question_id, page, count) {
   // get all non-reported Answers for that product
-  return Question.aggregate([{$match: {question_id: question_id}}, {$unwind: $answers}, {$match:{reported: false}}, {$limit: count}]);
+  return Question.aggregate([{$match: {id: question_id}}, {$unwind: '$answers'}, {$match:{reported: 0}}, {$project: {'answers':1, _id:0}}, {$limit: count}])
+    .then((answers)=>{
+      return answers.map((answer)=>{
+        answer = answer.answers;
+        let photos = answer.photos.map((photo)=>{
+          return {'id': photo.id, 'url': photo.url}
+        });
+        return {
+          answer_id: answer.id,
+          body: answer.body,
+          date: answer.date_written,
+          answerer_name: answer.answerer_name,
+          helpfulness: answer.helpful,
+          photos: photos
+        }
+      })
+    });
 };
 // setA
 const setA = function(question_id, newA) {
@@ -80,10 +96,10 @@ const reportQ = function(question_id) {
 };
 // helpA
 const helpA = function(answer_id) {
-  Answer.findOne({id: answer_id}).select('question_id')
-    .then((id)=>{
-      return id.question_id;
-    })
+  // Answer.findOne({id: answer_id}).select('question_id')
+  //   .then((id)=>{
+  //     return id.question_id;
+  //   })
     // .then((product_id)=>{
       // Question.aggregate([{$match: {question_id: question_id}}, {$unwind: $answers}, {$match:{id: answer_id}}, {$inc:{'helpfulness': 1}}]);
       // // OR
@@ -91,6 +107,7 @@ const helpA = function(answer_id) {
     // })
 
   // may also get away with Question.update({answer.id: answer_id}, {$inc:{'answers.$.helpfulness':1}}), bc listed as index on mongo database
+  return Question.update({'answers.id': answer_id}, {$inc:{'answers.$.helpful': 1}});
 
   // use that question_id to target correct answer, and thereby correct answer, in the Question collection.
 };
