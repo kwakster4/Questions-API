@@ -17,6 +17,7 @@ app.get('/questions', (req, res) => {
       res.status(200).send(resObj);
     })
     .catch((err)=> {
+      console.log(err);
       res.status(500).end();
     });
 });
@@ -43,7 +44,14 @@ app.post('/questions/:question_id/answers', (req, res) => {
 });
 // add 1 to helpfulness counter: helpQ
 app.put('/questions/:question_id/helpful', (req, res) => {
-  // db.helpQ(question_id)
+  db.helpQ(parseInt(req.params.question_id))
+    .then((status)=>{
+      res.status(200).send('OK');
+    })
+    .catch((err)=>{
+      res.status(500).send();
+    })
+  res.end();
 });
 // mark question as reported: reportQ
 app.put('/questions/:question_id/report', (req, res) => {
@@ -53,7 +61,6 @@ app.put('/questions/:question_id/report', (req, res) => {
 app.put('/answers/:answer_id/helpful', (req, res) => {
   db.helpA(parseInt(req.params.answer_id))
     .then((status)=>{
-      console.log(status);
       res.status(200).send();
     })
     .catch((err)=>{

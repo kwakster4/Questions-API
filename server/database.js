@@ -31,6 +31,10 @@ const getQs = function(product_id, page, count) {
             photos: photos
           }
         });
+        let answersObj = {};
+        for (let answer of answers) {
+          answersObj[answer.answer_id] = answer;
+        }
         return {
           question_id: question.id,
           question_body: question.body,
@@ -38,7 +42,7 @@ const getQs = function(product_id, page, count) {
           asker_name: question.asker_name,
           question_helpfulness: question.helpful,
           reported: false,
-          answers: answers
+          answers: answersObj
         }
       })
       return questions;
@@ -87,7 +91,7 @@ const setA = function(question_id, newA) {
 // helpQ
 const helpQ = function(question_id) {
   // access and change helpfulness of question.
-  // Question.update({question_id: question_id}, {$inc:{'helpfulness': 1}});
+  return Question.updateOne({id: question_id}, {$inc:{'helpful': 1}});
 };
 // reportQ
 const reportQ = function(question_id) {
@@ -96,20 +100,21 @@ const reportQ = function(question_id) {
 };
 // helpA
 const helpA = function(answer_id) {
+
   // Answer.findOne({id: answer_id}).select('question_id')
   //   .then((id)=>{
   //     return id.question_id;
   //   })
-    // .then((product_id)=>{
-      // Question.aggregate([{$match: {question_id: question_id}}, {$unwind: $answers}, {$match:{id: answer_id}}, {$inc:{'helpfulness': 1}}]);
+    // .then((question_id)=>{
+      // use that question_id to target correct answer, and thereby correct answer, in the Question collection.
+      // Question.aggregate([{$match: {id: question_id}}, {$unwind: $answers}, {$match:{id: answer_id}}, {$inc:{'helpfulness': 1}}]);
       // // OR
-      // Question.update({product_id: product_id, answers.id: answer_id}, {$inc:{'answers.$.helpfulness': 1}});
+      // Question.update({id: question_id, answers.id: answer_id}, {$inc:{'answers.$.helpfulness': 1}});
     // })
 
   // may also get away with Question.update({answer.id: answer_id}, {$inc:{'answers.$.helpfulness':1}}), bc listed as index on mongo database
-  return Question.update({'answers.id': answer_id}, {$inc:{'answers.$.helpful': 1}});
+  return Question.updateOne({'answers.id': answer_id}, {$inc:{'answers.$.helpful': 1}});
 
-  // use that question_id to target correct answer, and thereby correct answer, in the Question collection.
 };
 // reportA
 const reportA = function(answer_id) {
