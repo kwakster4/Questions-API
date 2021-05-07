@@ -9,6 +9,17 @@ app.get('/', (req, res) => {
 // get all non-reported questions: getQs
 app.get('/questions', (req, res) => {
   // db.getQs(product_id, page, count)
+  // req.params vs. req.query
+  let query = req.query;
+  db.getQs(parseInt(query.product_id), parseInt(query.page), parseInt(query.count))
+    .then((questions)=>{
+      let resObj = {"product_id": query.product_id, "results": questions}
+      res.status(200).send(resObj);
+    })
+    .catch((err)=> {
+      console.log(err);
+      res.status(500).end();
+    });
 });
 // post a question: setQ
 app.post('/questions', (req, res) => {
@@ -40,5 +51,5 @@ app.put('/answers/:answer_id/report', (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`)
+  console.log(`QnA API listening at http://localhost:${port}`)
 })

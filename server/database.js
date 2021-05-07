@@ -11,7 +11,38 @@ const Answer = mongoose.model('Answer', schemas.answerSchema, 'answers');
 // getQs
 const getQs = function(product_id, page, count) {
   // get all non-reported Questions for that product
-  return Question.aggregate([{$match: {$and: [{reported: false}, {product_id: product_id}]}}, {$limit: count}]);
+  count = count || 100;
+  // mongoose method of Question.find doesn't return anything when setting reported to false or 0;
+  // return Question.find({'product_id': product_id, reported:false}, {limit: count});
+  // when using aggregate, reported returns as 0 instead of boolean.
+  return Question.aggregate([{$match: {$and: [{reported: 0}, {'product_id': product_id}]}}, {$limit: count}])
+    .then((questions)=>{
+      questions = questions.map((question)=> {
+        let answers = question.answers.map((answer)=>{
+          let photos = answer.photos.map((photo)=>{
+            return {'id': photo.id, 'url': photo.url}
+          });
+          return {
+            answer_id: answer.id,
+            body: answer.body,
+            date: answer.date_written,
+            answerer_name: answer.answerer_name,
+            helpfulness: answer.helpful,
+            photos: photos
+          }
+        });
+        return {
+          question_id: question.id,
+          question_body: question.body,
+          question_date: question.date_written,
+          asker_name: question.asker_name,
+          question_helpfulness: question.helpful,
+          reported: false,
+          answers: answers
+        }
+      })
+      return questions;
+    });
 };
 // setQ
 const setQ = function(newQ) {
@@ -40,18 +71,18 @@ const setA = function(question_id, newA) {
 // helpQ
 const helpQ = function(question_id) {
   // access and change helpfulness of question.
-  Question.update({question_id: question_id}, {$inc:{'helpfulness': 1}});
+  // Question.update({question_id: question_id}, {$inc:{'helpfulness': 1}});
 };
 // reportQ
 const reportQ = function(question_id) {
   //
-  Question.update({question_id: question_id}, {$set:{'reported': true}});
+  // Question.update({question_id: question_id}, {$set:{'reported': true}});
 };
 // helpA
 const helpA = function(answer_id) {
   Answer.findOne({id: answer_id}).select('question_id')
     .then((id)=>{
-      return = id.question_id;
+      return id.question_id;
     })
     // .then((product_id)=>{
       // Question.aggregate([{$match: {question_id: question_id}}, {$unwind: $answers}, {$match:{id: answer_id}}, {$inc:{'helpfulness': 1}}]);
@@ -68,7 +99,7 @@ const reportA = function(answer_id) {
   //
   Answer.findOne({id: answer_id}).select('question_id')
     .then((id)=>{
-      return = id.question_id;
+      return id.question_id;
     })
     // .then((product_id)=>{
       // Question.aggregate([{$match: {question_id: question_id}}, {$unwind: $answers}, {$match:{id: answer_id}}, {$set:{'reported': true}}]);
