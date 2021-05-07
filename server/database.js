@@ -45,7 +45,7 @@ const helpQ = function(question_id) {
 // reportQ
 const reportQ = function(question_id) {
   //
-  Question.update({question_id: question_id}, {$set:{}})
+  Question.update({question_id: question_id}, {$set:{'reported': true}});
 };
 // helpA
 const helpA = function(answer_id) {
@@ -56,8 +56,10 @@ const helpA = function(answer_id) {
     // .then((product_id)=>{
       // Question.aggregate([{$match: {question_id: question_id}}, {$unwind: $answers}, {$match:{id: answer_id}}, {$inc:{'helpfulness': 1}}]);
       // // OR
-      // Question.update({product_id: product_id, answers.answer_id: answer_id}, {$inc:{'answers.$.helpfulness': 1}});
+      // Question.update({product_id: product_id, answers.id: answer_id}, {$inc:{'answers.$.helpfulness': 1}});
     // })
+
+  // may also get away with Question.update({answer.id: answer_id}, {$inc:{'answers.$.helpfulness':1}}), bc listed as index on mongo database
 
   // use that question_id to target correct answer, and thereby correct answer, in the Question collection.
 };
