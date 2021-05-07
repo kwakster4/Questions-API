@@ -7,26 +7,26 @@ const Photo = mongoose.model('Photo', schemas.photoSchema, 'answer_photos');
 const Answer = mongoose.model('Answer', schemas.answerSchema, 'answers');
 const Question = mongoose.model('Question', schemas.questionSchema, 'questions');
 console.log('aggregating...');
-// Question.aggregate([{$lookup: {from: "merged_answers", localField: "id", foreignField: 'question_id', as: "answers"}}, {$out: 'merged_questions'}]).allowDiskUse(true).then(()=>{console.log('finished!')}).catch((err)=>{console.log(err)});
-Question.aggregate([{$lookup: {from: "answers", localField: "id", foreignField: 'question_id', as: "answers"}}, {$out: 'questions'}]).allowDiskUse(true)
-  .then(()=>{
-    console.log('FINISHED!');
-  })
-  .catch((err)=>{
-    console.log(err);
-  });
 
-// Answer.aggregate([{$lookup: {from: "answer_photos", localField: "id", foreignField: 'answer_id', as: "photos"}}, {$out: 'answers'}]).allowDiskUse(true)
+// Question.aggregate([{$lookup: {from: "answers", localField: "id", foreignField: 'question_id', as: "answers"}}, {$out: 'questions'}]).allowDiskUse(true)
 //   .then(()=>{
-//     console.log('finished answer aggregate. aggregating question');
-//     return Question.aggregate([{$lookup: {from: "answers", localField: "id", foreignField: 'question_id', as: "answers"}}, {$out: 'questions'}]).allowDiskUse(true);
-//   })
-//   .then(()=>{
-//     console.log('finished!');
+//     console.log('FINISHED!');
 //   })
 //   .catch((err)=>{
 //     console.log(err);
 //   });
+
+Answer.aggregate([{$lookup: {from: "answer_photos", localField: "id", foreignField: 'answer_id', as: "photos"}}, {$out: 'answers'}]).allowDiskUse(true)
+  .then(()=>{
+    console.log('finished answer aggregate. aggregating question');
+    return Question.aggregate([{$lookup: {from: "answers", localField: "id", foreignField: 'question_id', as: "answers"}}, {$out: 'questions'}]).allowDiskUse(true);
+  })
+  .then(()=>{
+    console.log('finished!');
+  })
+  .catch((err)=>{
+    console.log(err);
+  });
 
 // Photo.aggregate([{$limit: 10}, {$group: {_id: '$answer_id', photos: { $push: { id: '$id', url: '$url'}}}}, {$out: 'new_photos'}]).allowDiskUse(true)
 //   .then(()=> {
