@@ -52,13 +52,19 @@ const getQs = function(product_id, page, count) {
 const setQ = function(newQ) {
   let currentTime = moment().format('YYYY-MM-DD');
   newQ.date_written = currentTime;
-  MaxId.findOne({})
+  return MaxId.findOne({for: 'questions'})
+    .then((id)=>{
+      console.log(id.maxId)
+      newQ.id = id.maxId + 1;
+      console.log(newQ);
+      // return Questions.create(newQ);
+      return;
+    })
   // newQ needs id
   // need to generate a unique id, make sure its a number\
   // found max_id of current aggregate
   // db.questions.aggregate([{$group:{_id:null, max_id: {$max: '$id'}}}])
   // { "_id" : null, "max_id" : 3521634 }
-  return 'hello';
 };
 // getAs
 const getAs = function(question_id, page, count) {

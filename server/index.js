@@ -29,6 +29,7 @@ app.get('/questions', (req, res) => {
 app.post('/questions', (req, res) => {
   let newQ = {...req.body};
   newQ.asker_name = newQ.name;
+  newQ.asker_email = newQ.email;
   delete newQ.name;
   delete newQ.email;
   newQ.helpful = 0;
