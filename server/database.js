@@ -35,7 +35,7 @@ const getQs = function(product_id, page, count) {
         });
         let answersObj = {};
         for (let answer of answers) {
-          answersObj[answer.answer_id] = answer;
+          answersObj[answer.id] = answer;
         }
         question.question_id = question._id;
         delete question._id;
