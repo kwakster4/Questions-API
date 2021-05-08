@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
-const schemas = require('./../schemas');
+const schemas = require('./../schemas/serverSchemas');
 const moment = require('moment');
 // index behavior recommended to be turned off for production, as index creation can have performance impact. turn off with autoIndex false.
 // e.g. mongoose.connect('mongodb://user:pass@localhost:port/database', { autoIndex: false });
 mongoose.connect('mongodb://localhost/sdc_q_a', {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: true});
-const Question = mongoose.model('Question', schemas.questionSchema,
+const Question = mongoose.model('Question', schemas.newQuestionSchema,
 'questions');
 const MaxId = mongoose.model('MaxId', schemas.maxIdSchema, 'maxids');
 
@@ -52,13 +52,10 @@ const getQs = function(product_id, page, count) {
 const setQ = function(newQ) {
   let currentTime = moment().format('YYYY-MM-DD');
   newQ.date_written = currentTime;
-  return MaxId.findOne({for: 'questions'})
+  return MaxId.findOneAndUpdate({for: 'questions'}, {$inc: {'maxId': 1}})
     .then((id)=>{
-      console.log(id.maxId)
       newQ.id = id.maxId + 1;
-      console.log(newQ);
-      // return Questions.create(newQ);
-      return;
+      return Question.create(newQ);
     })
   // newQ needs id
   // need to generate a unique id, make sure its a number\
@@ -89,10 +86,16 @@ const getAs = function(question_id, page, count) {
 };
 // setA
 const setA = function(question_id, newA) {
-  // newA = {body, name, email, photos}
-  let newAnswer = {...newA};
-  // question needs: id, date_written, helpful, reported, and photos
-  // need to generate a unique id, make sure its a number
+  let currentTime = moment().format('YYYY-MM-DD');
+  newA.date_written = currentTime;
+  // answer needs id
+  // currently set as max_Id, change to maxId for it to work.
+  return MaxId.findOneAndUpdate({for: 'answers'}, {$inc: {'maxId': 1}})
+    .then((id)=>{
+      newA.id = id.maxId + 1;
+      console.log(newA);
+      return Question.updateOne({id: question_id}, {$push: {answers: newA}})
+    })
 };
 // helpQ
 const helpQ = function(question_id) {

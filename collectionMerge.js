@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-const schemas = require('./schemas');
-// uses aggregate merge
+const schemas = require('./schemas/schemas.js');
+// schemas for collectionMerge, serverSchemas for database use.
 mongoose.connect('mongodb://localhost/sdc_q_a', {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: true});
 
 // const Photo = mongoose.model('Photo', schemas.photoSchema, 'answer_photos');

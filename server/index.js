@@ -25,6 +25,18 @@ app.get('/questions', (req, res) => {
       res.status(500).end();
     });
 });
+
+app.get('/questions/:question_id/answers', (req, res) => {
+  let query = req.query;
+  db.getAs(parseInt(req.params.question_id), parseInt(query.page), parseInt(query.count))
+    .then((answers)=>{
+      let resObj = {question: req.params.question_id, page: parseInt(query.page), count: answers.length, results: answers};
+      res.status(200).send(resObj);
+    })
+    .catch((err)=>{
+      res.status(500).end();
+    })
+});
 // post a question: setQ
 app.post('/questions', (req, res) => {
   let newQ = {...req.body};
@@ -37,34 +49,38 @@ app.post('/questions', (req, res) => {
   newQ.answers = [];
   db.setQ(newQ)
     .then(()=> {
-      res.end();
+      res.status(201).send('CREATED');
     })
     .catch((err)=>{
       console.log(err);
-    });
-});
-// get all non-reported answers: getAs
-app.get('/questions/:question_id/answers', (req, res) => {
-  // db.getAs(question_id, page, count)
-  let query = req.query;
-  db.getAs(parseInt(req.params.question_id), parseInt(query.page), parseInt(query.count))
-    .then((answers)=>{
-      let resObj = {question: req.params.question_id, page: parseInt(query.page), count: answers.length, results: answers};
-      res.status(200).send(resObj);
-    })
-    .catch((err)=>{
       res.status(500).end();
-    })
+    });
 });
 // post an answer to a question: setA
 app.post('/questions/:question_id/answers', (req, res) => {
   // db.setA(question_id, newA)
+  let newA = {...req.body};
+  newA.answerer_name = newA.name;
+  newA.answerer_email = newA.email;
+  delete newA.name;
+  delete newA.email;
+  newA.helpful = 0;
+  newA.reported = 0;
+  newA.question_id= parseInt(req.params.question_id);
+  db.setA(newA.question_id, newA)
+    .then(()=> {
+      res.status(201).send('CREATED');
+    })
+    .catch((err)=>{
+      console.log(err);
+      res.status(500).end();
+    });
 });
 // add 1 to helpfulness counter: helpQ
 app.put('/questions/:question_id/helpful', (req, res) => {
   db.helpQ(parseInt(req.params.question_id))
     .then((status)=>{
-      res.status(200).send('OK');
+      res.status(204).send('NO CONTENT');
     })
     .catch((err)=>{
       res.status(500).send();
@@ -79,7 +95,7 @@ app.put('/questions/:question_id/report', (req, res) => {
 app.put('/answers/:answer_id/helpful', (req, res) => {
   db.helpA(parseInt(req.params.answer_id))
     .then((status)=>{
-      res.status(200).send();
+      res.status(204).send('NO CONTENT');
     })
     .catch((err)=>{
       res.status(500).send();
