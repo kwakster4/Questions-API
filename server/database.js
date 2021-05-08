@@ -8,7 +8,7 @@ const Question = mongoose.model('Question', schemas.newQuestionSchema,
 'questions');
 const MaxId = mongoose.model('MaxId', schemas.maxIdSchema, 'maxids');
 
-// getQs
+
 const getQs = function(product_id, page, count) {
   // get all non-reported Questions for that product
   count = count || 100;
@@ -18,7 +18,10 @@ const getQs = function(product_id, page, count) {
   return Question.aggregate([{$match: {$and: [{reported: 0}, {'product_id': product_id}]}}, {$limit: count}])
     .then((questions)=>{
       questions = questions.map((question)=> {
-        let answers = question.answers.map((answer)=>{
+        let answers = question.answers.filter((answer) => {
+          return (answer.reported !== 1);
+        })
+        answers = answers.map((answer)=>{
           let photos = answer.photos.map((photo)=>{
             return {'id': photo.id, 'url': photo.url}
           });
@@ -48,7 +51,7 @@ const getQs = function(product_id, page, count) {
       return questions;
     });
 };
-// setQ
+
 const setQ = function(newQ) {
   let currentTime = moment().format('YYYY-MM-DD');
   newQ.date_written = currentTime;
@@ -63,7 +66,7 @@ const setQ = function(newQ) {
   // db.questions.aggregate([{$group:{_id:null, max_id: {$max: '$id'}}}])
   // { "_id" : null, "max_id" : 3521634 }
 };
-// getAs
+
 const getAs = function(question_id, page, count) {
   // get all non-reported Answers for that product
   return Question.aggregate([{$match: {id: question_id}}, {$unwind: '$answers'}, {$match:{reported: 0}}, {$project: {'answers':1, _id:0}}, {$limit: count}])
@@ -84,12 +87,10 @@ const getAs = function(question_id, page, count) {
       })
     });
 };
-// setA
+
 const setA = function(question_id, newA) {
   let currentTime = moment().format('YYYY-MM-DD');
   newA.date_written = currentTime;
-  // answer needs id
-  // currently set as max_Id, change to maxId for it to work.
   return MaxId.findOneAndUpdate({for: 'answers'}, {$inc: {'maxId': 1}})
     .then((id)=>{
       newA.id = id.maxId + 1;
@@ -97,17 +98,16 @@ const setA = function(question_id, newA) {
       return Question.updateOne({id: question_id}, {$push: {answers: newA}})
     })
 };
-// helpQ
+
 const helpQ = function(question_id) {
   // access and change helpfulness of question.
   return Question.updateOne({id: question_id}, {$inc:{'helpful': 1}});
 };
-// reportQ
+
 const reportQ = function(question_id) {
-  //
-  // Question.update({question_id: question_id}, {$set:{'reported': true}});
+  return Question.updateOne({id: question_id}, {$set:{'reported': 1}});
 };
-// helpA
+
 const helpA = function(answer_id) {
   // may also get away with Question.update({answer.id: answer_id}, {$inc:{'answers.$.helpfulness':1}}), bc listed as index on mongo database
   return Question.updateOne({'answers.id': answer_id}, {$inc:{'answers.$.helpful': 1}});
@@ -122,8 +122,9 @@ const helpA = function(answer_id) {
       // Question.update({id: question_id, answers.id: answer_id}, {$inc:{'answers.$.helpfulness': 1}});
     // })
 };
-// reportA
+
 const reportA = function(answer_id) {
+  return Question.updateOne({'answers.id': answer_id}, {$set:{'answers.$.reported': 1}});
   // Answer.findOne({id: answer_id}).select('question_id')
   //   .then((id)=>{
   //     return id.question_id;

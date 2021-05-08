@@ -20,7 +20,7 @@ const newAnswerSchema = new mongoose.Schema({
   "answerer_name": String,
   "answerer_email": String,
   "helpful": Number,
-  "reported": Boolean,
+  "reported": Number,
   // photos is an array of objects with id and urls.
   "photos": [newPhotoSchema]
 });
@@ -40,7 +40,7 @@ const newQuestionSchema = new mongoose.Schema({
   "asker_name": String,
   "asker_email": String,
   "helpful": Number,
-  "reported": Boolean,
+  "reported": Number,
   // should I have answerSchema inside questionSchema?
   "answers": [newAnswerSchema]
 });

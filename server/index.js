@@ -12,8 +12,6 @@ app.get('/', (req, res) => {
 });
 
 app.get('/questions', (req, res) => {
-  // db.getQs(product_id, page, count)
-  // req.params vs. req.query
   let query = req.query;
   db.getQs(parseInt(query.product_id), parseInt(query.page), parseInt(query.count))
     .then((questions)=>{
@@ -37,7 +35,7 @@ app.get('/questions/:question_id/answers', (req, res) => {
       res.status(500).end();
     })
 });
-// post a question: setQ
+
 app.post('/questions', (req, res) => {
   let newQ = {...req.body};
   newQ.asker_name = newQ.name;
@@ -56,9 +54,8 @@ app.post('/questions', (req, res) => {
       res.status(500).end();
     });
 });
-// post an answer to a question: setA
+
 app.post('/questions/:question_id/answers', (req, res) => {
-  // db.setA(question_id, newA)
   let newA = {...req.body};
   newA.answerer_name = newA.name;
   newA.answerer_email = newA.email;
@@ -76,7 +73,7 @@ app.post('/questions/:question_id/answers', (req, res) => {
       res.status(500).end();
     });
 });
-// add 1 to helpfulness counter: helpQ
+
 app.put('/questions/:question_id/helpful', (req, res) => {
   db.helpQ(parseInt(req.params.question_id))
     .then((status)=>{
@@ -89,7 +86,14 @@ app.put('/questions/:question_id/helpful', (req, res) => {
 });
 // mark question as reported: reportQ
 app.put('/questions/:question_id/report', (req, res) => {
-  // db.reportQ(question_id)
+  db.reportQ(parseInt(req.params.question_id))
+    .then((status)=>{
+      res.status(204).send('NO CONTENT');
+    })
+    .catch((err)=>{
+      res.status(500).send();
+    })
+  res.end();
 });
 // add 1 to helpfulness counter: helpA
 app.put('/answers/:answer_id/helpful', (req, res) => {
@@ -103,7 +107,13 @@ app.put('/answers/:answer_id/helpful', (req, res) => {
 });
 // mark answer as reported: reportA
 app.put('/answers/:answer_id/report', (req, res) => {
-  // db.reportA(answer_id)
+  db.reportA(parseInt(req.params.answer_id))
+    .then((status)=>{
+      res.status(204).send('NO CONTENT');
+    })
+    .catch((err)=>{
+      res.status(500).send();
+    })
 });
 
 app.listen(port, () => {
