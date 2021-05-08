@@ -4,11 +4,19 @@ const moment = require('moment');
 // index behavior recommended to be turned off for production, as index creation can have performance impact. turn off with autoIndex false.
 // e.g. mongoose.connect('mongodb://user:pass@localhost:port/database', { autoIndex: false });
 mongoose.connect('mongodb://localhost/sdc_q_a', {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false});
-// mongoose.set('maxTimeMS', 1);
+// the schemas below doesn't work (next is not defined), but shows that maxTimeMS works
+// schemas.newQuestionSchema.pre('aggregate', function(next) {
+//   this._startTime = Date.now();
+// });
+// schemas.newQuestionSchema.post('aggregate', function(next) {
+//   if (this._startTime != null) {
+//     console.log('Runtime in MS: ', Date.now() - this._startTime);
+//   }
+// });
+
 const Question = mongoose.model('Question', schemas.newQuestionSchema,
 'questions');
 const MaxId = mongoose.model('MaxId', schemas.maxIdSchema, 'maxids');
-
 
 const getQs = function(product_id, page, count) {
   // get all non-reported Questions for that product
@@ -19,7 +27,7 @@ const getQs = function(product_id, page, count) {
 
   // the below comment works only if the question has an answer
   // return Question.aggregate([{$match: {$and: [{reported: {$ne:1 }}, {'product_id': product_id}]}}, {$unwind: '$answers'}, {$match: {'answers.reported': {$ne: 1}}}, {$group: {_id:'$id', answers: {$push: '$answers'}, question_body: {$first: '$body'}, 'question_date': {$first: '$date_written'}, 'asker_name':{$first:'$asker_name'}, 'question_helpfulness':{$first:'$helpful'}}}, {$limit: count}]).option({maxTimeMS: 50, allowDiskUse: true})
-  return Question.aggregate([{$match: {$and: [{reported: {$ne:1 }}, {'product_id': product_id}]}}, {$limit: count}])
+  return Question.aggregate([{$match: {$and: [{reported: {$ne:1 }}, {'product_id': product_id}]}}, {$limit: count}]).option({maxTimeMS: 50, allowDiskUse: true})
     .then((questions)=>{
       questions = questions.map((question)=> {
         let answers = question.answers.filter((answer)=>{
@@ -40,7 +48,6 @@ const getQs = function(product_id, page, count) {
         });
         let answersObj = {};
         for (let answer of answers) {
-          console.log(answer);
           answersObj[answer.id] = answer;
         }
         // question.question_id = question._id;
@@ -104,7 +111,7 @@ const setA = function(question_id, newA) {
   return MaxId.findOneAndUpdate({for: 'answers'}, {$inc: {'maxId': 1}}).maxTimeMS(50)
     .then((id)=>{
       newA.id = id.maxId + 1;
-      return Question.updateOne({id: question_id}, {$push: {answers: newA}})
+      return Question.updateOne({id: question_id}, {$push: {answers: newA}}).maxTimeMS(50);
     })
 };
 
