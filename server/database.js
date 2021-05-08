@@ -1,12 +1,12 @@
 const mongoose = require('mongoose');
 const schemas = require('./../schemas');
-// uses aggregate merge
+const moment = require('moment');
 // index behavior recommended to be turned off for production, as index creation can have performance impact. turn off with autoIndex false.
 // e.g. mongoose.connect('mongodb://user:pass@localhost:port/database', { autoIndex: false });
 mongoose.connect('mongodb://localhost/sdc_q_a', {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: true});
 const Question = mongoose.model('Question', schemas.questionSchema,
 'questions');
-const Answer = mongoose.model('Answer', schemas.answerSchema, 'answers');
+const MaxId = mongoose.model('MaxId', schemas.maxIdSchema, 'maxids');
 
 // getQs
 const getQs = function(product_id, page, count) {
@@ -50,15 +50,15 @@ const getQs = function(product_id, page, count) {
 };
 // setQ
 const setQ = function(newQ) {
-  // newQ = {body, name, email, product_id}
-  let newQuestion = {...newQ};
-  // question needs: id, date_written, helpful, reported, and answers
-  // need to generate a unique id, make sure its a number
-  let id = 0;
-  Question.aggregate([{$count: "maxId"}]).then((countObj)=>{
-    id = countObj.maxId + 1;
-    newQuestion.id = id;
-  });
+  let currentTime = moment().format('YYYY-MM-DD');
+  newQ.date_written = currentTime;
+  MaxId.findOne({})
+  // newQ needs id
+  // need to generate a unique id, make sure its a number\
+  // found max_id of current aggregate
+  // db.questions.aggregate([{$group:{_id:null, max_id: {$max: '$id'}}}])
+  // { "_id" : null, "max_id" : 3521634 }
+  return 'hello';
 };
 // getAs
 const getAs = function(question_id, page, count) {
@@ -100,7 +100,8 @@ const reportQ = function(question_id) {
 };
 // helpA
 const helpA = function(answer_id) {
-
+  // may also get away with Question.update({answer.id: answer_id}, {$inc:{'answers.$.helpfulness':1}}), bc listed as index on mongo database
+  return Question.updateOne({'answers.id': answer_id}, {$inc:{'answers.$.helpful': 1}});
   // Answer.findOne({id: answer_id}).select('question_id')
   //   .then((id)=>{
   //     return id.question_id;
@@ -111,18 +112,13 @@ const helpA = function(answer_id) {
       // // OR
       // Question.update({id: question_id, answers.id: answer_id}, {$inc:{'answers.$.helpfulness': 1}});
     // })
-
-  // may also get away with Question.update({answer.id: answer_id}, {$inc:{'answers.$.helpfulness':1}}), bc listed as index on mongo database
-  return Question.updateOne({'answers.id': answer_id}, {$inc:{'answers.$.helpful': 1}});
-
 };
 // reportA
 const reportA = function(answer_id) {
-  //
-  Answer.findOne({id: answer_id}).select('question_id')
-    .then((id)=>{
-      return id.question_id;
-    })
+  // Answer.findOne({id: answer_id}).select('question_id')
+  //   .then((id)=>{
+  //     return id.question_id;
+  //   })
     // .then((product_id)=>{
       // Question.aggregate([{$match: {question_id: question_id}}, {$unwind: $answers}, {$match:{id: answer_id}}, {$set:{'reported': true}}]);
       // // OR

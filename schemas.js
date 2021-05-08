@@ -54,5 +54,14 @@ const questionSchema = new mongoose.Schema({
 });
 questionSchema.index({id: 1});
 
+const maxIdSchema = new mongoose.Schema({
+  "maxId": {
+    type: Number
+  },
+  "for": {
+    type: String,
+    index: true
+  }
+});
 
-module.exports = {photoSchema, answerSchema, questionSchema};
+module.exports = {photoSchema, answerSchema, questionSchema, maxIdSchema};

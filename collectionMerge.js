@@ -3,11 +3,46 @@ const schemas = require('./schemas');
 // uses aggregate merge
 mongoose.connect('mongodb://localhost/sdc_q_a', {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: true});
 
-const Photo = mongoose.model('Photo', schemas.photoSchema, 'answer_photos');
+// const Photo = mongoose.model('Photo', schemas.photoSchema, 'answer_photos');
 const Answer = mongoose.model('Answer', schemas.answerSchema, 'answers');
 const Question = mongoose.model('Question', schemas.questionSchema, 'questions');
-console.log('aggregating...');
+const MaxId = mongoose.model('maxId', schemas.maxIdSchema);
 
+// General startup stuff
+// console.log('aggregating...');
+// Answer.aggregate([{$lookup: {from: "answer_photos", localField: "id", foreignField: 'answer_id', as: "photos"}}, {$out: 'answers'}]).allowDiskUse(true)
+//   .then(()=>{
+//     console.log('finished answer aggregate. aggregating question');
+//     return Question.aggregate([{$lookup: {from: "answers", localField: "id", foreignField: 'question_id', as: "answers"}}, {$out: 'questions'}]).allowDiskUse(true);
+//   })
+//   .then(()=>{
+//     console.log('finished!');
+//   })
+//   .catch((err)=>{
+//     console.log(err);
+//   });
+
+// When aggregated everything but not have maxId collection yet
+// Question.aggregate([{$group:{_id:null, max_id: {$max: '$id'}}}])
+//   .then((data)=>{
+//     console.log('creating question max-id');
+//     return MaxId.create({maxId: data[0].max_id, for: 'questions'});
+//   })
+//   .then(()=>{
+//     return Answer.aggregate([{$group:{_id:null, max_id: {$max: '$id'}}}])
+//   })
+//   .then((data)=>{
+//     return MaxId.create({maxId: data[0].max_id, for: 'answers'});
+//   })
+//   .then(()=>{
+//     console.log('maxIds finished!!');
+//     return;
+//   })
+//   .catch((err)=>{
+//     console.log(err)
+//   });
+
+// When aggregated answer but not Question
 // Question.aggregate([{$lookup: {from: "answers", localField: "id", foreignField: 'question_id', as: "answers"}}, {$out: 'questions'}]).allowDiskUse(true)
 //   .then(()=>{
 //     console.log('FINISHED!');
@@ -16,18 +51,11 @@ console.log('aggregating...');
 //     console.log(err);
 //   });
 
-Answer.aggregate([{$lookup: {from: "answer_photos", localField: "id", foreignField: 'answer_id', as: "photos"}}, {$out: 'answers'}]).allowDiskUse(true)
-  .then(()=>{
-    console.log('finished answer aggregate. aggregating question');
-    return Question.aggregate([{$lookup: {from: "answers", localField: "id", foreignField: 'question_id', as: "answers"}}, {$out: 'questions'}]).allowDiskUse(true);
-  })
-  .then(()=>{
-    console.log('finished!');
-  })
-  .catch((err)=>{
-    console.log(err);
-  });
 
+
+
+
+// OLD, DOES NOT WORK WELL
 // Photo.aggregate([{$limit: 10}, {$group: {_id: '$answer_id', photos: { $push: { id: '$id', url: '$url'}}}}, {$out: 'new_photos'}]).allowDiskUse(true)
 //   .then(()=> {
 //     console.log('aggregating answer');

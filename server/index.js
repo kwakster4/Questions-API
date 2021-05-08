@@ -2,11 +2,15 @@ const express = require('express');
 const app = express();
 const port = 3001;
 const db = require('./database.js');
+const bodyParser = require('body-parser')
+
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
 //  test with product 1, question 4 (helpfulness 6), answer 65 (helpfulness 1);
 app.get('/', (req, res) => {
   res.send('Hello World!')
 });
-// get all non-reported questions: getQs
+
 app.get('/questions', (req, res) => {
   // db.getQs(product_id, page, count)
   // req.params vs. req.query
@@ -23,7 +27,20 @@ app.get('/questions', (req, res) => {
 });
 // post a question: setQ
 app.post('/questions', (req, res) => {
-  // db.setQ(newQ)
+  let newQ = {...req.body};
+  newQ.asker_name = newQ.name;
+  delete newQ.name;
+  delete newQ.email;
+  newQ.helpful = 0;
+  newQ.reported = 0;
+  newQ.answers = [];
+  db.setQ(newQ)
+    .then(()=> {
+      res.end();
+    })
+    .catch((err)=>{
+      console.log(err);
+    });
 });
 // get all non-reported answers: getAs
 app.get('/questions/:question_id/answers', (req, res) => {
