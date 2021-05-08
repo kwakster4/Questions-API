@@ -11,22 +11,21 @@ const MaxId = mongoose.model('MaxId', schemas.maxIdSchema, 'maxids');
 
 const getQs = function(product_id, page, count) {
   // get all non-reported Questions for that product
-  count = count || 100;
+  count = count || 5;
   // mongoose method of Question.find doesn't return anything when setting reported to false or 0;
   // return Question.find({'product_id': product_id, reported:false}, {limit: count});
   // when using aggregate, reported returns as 0 instead of boolean.
-  return Question.aggregate([{$match: {$and: [{reported: 0}, {'product_id': product_id}]}}, {$limit: count}])
+
+  // return Question.aggregate([{$match: {$and: [{reported: 0}, {'product_id': product_id}]}}, {$limit: count}])
+  return Question.aggregate([{$match: {$and: [{reported: {$ne:1 }}, {'product_id': product_id}]}}, {$unwind: '$answers'}, {$match: {'answers.reported': {$ne: 1}}}, {$group: {_id:'$id', answers: {$push: '$answers'}, question_body: {$first: '$body'}, 'question_date': {$first: '$date_written'}, 'asker_name':{$first:'$asker_name'}, 'question_helpfulness':{$first:'$helpful'}}}, {$limit: count}])
     .then((questions)=>{
       questions = questions.map((question)=> {
-        let answers = question.answers.filter((answer) => {
-          return (answer.reported !== 1);
-        })
-        answers = answers.map((answer)=>{
+        let answers = question.answers.map((answer)=>{
           let photos = answer.photos.map((photo)=>{
             return {'id': photo.id, 'url': photo.url}
           });
           return {
-            answer_id: answer.id,
+            id: answer.id,
             body: answer.body,
             date: answer.date_written,
             answerer_name: answer.answerer_name,
@@ -38,15 +37,20 @@ const getQs = function(product_id, page, count) {
         for (let answer of answers) {
           answersObj[answer.answer_id] = answer;
         }
-        return {
-          question_id: question.id,
-          question_body: question.body,
-          question_date: question.date_written,
-          asker_name: question.asker_name,
-          question_helpfulness: question.helpful,
-          reported: false,
-          answers: answersObj
-        }
+        question.question_id = question._id;
+        delete question._id;
+        question.reported= false;
+        question.answers = answersObj;
+        return question;
+        // return {
+        //   question_id: question.id,
+        //   question_body: question.body,
+        //   question_date: question.date_written,
+        //   asker_name: question.asker_name,
+        //   question_helpfulness: question.helpful,
+        //   reported: false,
+        //   answers: answersObj
+        // }
       })
       return questions;
     });
@@ -69,7 +73,7 @@ const setQ = function(newQ) {
 
 const getAs = function(question_id, page, count) {
   // get all non-reported Answers for that product
-  return Question.aggregate([{$match: {id: question_id}}, {$unwind: '$answers'}, {$match:{reported: 0}}, {$project: {'answers':1, _id:0}}, {$limit: count}])
+  return Question.aggregate([{$match: {id: question_id}}, {$unwind: '$answers'}, {$match: {'answers.reported': {$ne: 1}}}, {$project: {'answers':1, _id:0}}, {$limit: count}])
     .then((answers)=>{
       return answers.map((answer)=>{
         answer = answer.answers;
@@ -94,7 +98,6 @@ const setA = function(question_id, newA) {
   return MaxId.findOneAndUpdate({for: 'answers'}, {$inc: {'maxId': 1}})
     .then((id)=>{
       newA.id = id.maxId + 1;
-      console.log(newA);
       return Question.updateOne({id: question_id}, {$push: {answers: newA}})
     })
 };

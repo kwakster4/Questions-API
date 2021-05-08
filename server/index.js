@@ -26,12 +26,15 @@ app.get('/questions', (req, res) => {
 
 app.get('/questions/:question_id/answers', (req, res) => {
   let query = req.query;
+  if (!query.page) { query.page = 0; };
+  if (!query.count) { query.count = 5; };
   db.getAs(parseInt(req.params.question_id), parseInt(query.page), parseInt(query.count))
     .then((answers)=>{
       let resObj = {question: req.params.question_id, page: parseInt(query.page), count: answers.length, results: answers};
       res.status(200).send(resObj);
     })
     .catch((err)=>{
+      console.log(err);
       res.status(500).end();
     })
 });
