@@ -16,11 +16,27 @@ const MaxId = mongoose.model('maxId', schemas.maxIdSchema);
 //     return Question.aggregate([{$lookup: {from: "answers", localField: "id", foreignField: 'question_id', as: "answers"}}, {$out: 'questions'}]).allowDiskUse(true);
 //   })
 //   .then(()=>{
-//     console.log('finished!');
+//     console.log('finished question aggregate!');
+//     return Question.aggregate([{$group:{_id:null, max_id: {$max: '$id'}}}])
+//   })
+//   .then((data)=>{
+//     console.log('creating question max-id');
+//     return MaxId.create({maxId: data[0].max_id, for: 'questions'});
+//   })
+//   .then(()=>{
+//     return Answer.aggregate([{$group:{_id:null, max_id: {$max: '$id'}}}])
+//   })
+//   .then((data)=>{
+//     return MaxId.create({maxId: data[0].max_id, for: 'answers'});
+//   })
+//   .then(()=>{
+//     console.log('maxIds finished!!');
+//     return;
 //   })
 //   .catch((err)=>{
 //     console.log(err);
 //   });
+
 
 // When aggregated everything but not have maxId collection yet
 // Question.aggregate([{$group:{_id:null, max_id: {$max: '$id'}}}])

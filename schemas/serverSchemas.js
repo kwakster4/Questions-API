@@ -9,10 +9,11 @@ const newPhotoSchema = new mongoose.Schema({
 });
 
 const newAnswerSchema = new mongoose.Schema({
-  "question_id": {
-    type: Number,
-    index: true
-  },
+  // "question_id": {
+  //   type: Number,
+  //   index: true
+  // },
+  "question_id": Number,
   "id": {
     type: Number,
     unique: true

@@ -2,7 +2,7 @@ import http from 'k6/http';
 import { sleep } from 'k6';
 import { group } from 'k6';
 export let options = {
-  vus: 1,
+  vus: 1000,
   duration: '30s',
 };
 export default function () {
@@ -54,7 +54,6 @@ export default function () {
       },
     };
     http.post(url, payload, params);
-    sleep(1);
   });
 
   // group('post answers test (Qid: 3521600)', function() {
