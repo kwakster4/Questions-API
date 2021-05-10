@@ -1,9 +1,11 @@
 const mongoose = require('mongoose');
 // use indexes on foreign keys to speed up lookup
 const newPhotoSchema = new mongoose.Schema({
-    "id": Number,
-    "answer_id": Number,
-    "url": String
+  // when updating answers, are id and answer_id necessary?
+  // at least id is necessary
+  "id": Number,
+  "answer_id": Number,
+  "url": String
 });
 
 const newAnswerSchema = new mongoose.Schema({

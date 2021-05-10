@@ -60,6 +60,15 @@ app.post('/questions', (req, res) => {
 
 app.post('/questions/:question_id/answers', (req, res) => {
   let newA = {...req.body};
+  if (Object.keys(newA).length === 0) {
+    res.sendStatus(400);
+  }
+  for (let i = 0; i < newA.photos.length; i++) {
+    newA.photos[i] = {
+      id: (i + 1),
+      url: newA.photos[i]
+    }
+  }
   newA.answerer_name = newA.name;
   newA.answerer_email = newA.email;
   delete newA.name;
@@ -75,6 +84,7 @@ app.post('/questions/:question_id/answers', (req, res) => {
       console.log(err);
       res.status(500).end();
     });
+  res.end();
 });
 
 app.put('/questions/:question_id/helpful', (req, res) => {

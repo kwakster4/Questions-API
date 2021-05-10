@@ -2,8 +2,7 @@ const mongoose = require('mongoose');
 // use indexes on foreign keys to speed up lookup
 const photoSchema = new mongoose.Schema({
     "id": {
-      type: Number,
-      unique: true
+      type: Number
     },
     "answer_id": {
       type: Number,

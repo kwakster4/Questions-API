@@ -4,7 +4,8 @@
   "description": "api for sdc qna",
   "main": "index.js",
   "scripts": {
-    "dev-server": "nodemon ./server"
+    "dev-server": "nodemon ./server",
+    "stress-test": "k6 run stress.js"
   },
   "repository": {
     "type": "git",
