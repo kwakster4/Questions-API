@@ -6,10 +6,10 @@ export let options = {
   duration: '30s',
 };
 export default function () {
-  // group('get questions test (Pid: 1000005)', function() {
-  //   http.get('http://localhost:3001/questions/?product_id=1000005&page=0&count=100');
-  //   sleep(1);
-  // });
+  group('get questions test (Pid: 1000005)', function() {
+    http.get('http://localhost:3001/questions/?product_id=1000005&page=0&count=100');
+    sleep(1);
+  });
 
   // group('get answers test (Qid: 3521600)', function() {
   //   http.get('http://localhost:3001/questions/3521600/answers');
