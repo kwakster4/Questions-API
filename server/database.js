@@ -1,9 +1,6 @@
 const mongoose = require('mongoose');
 const schemas = require('./../schemas/serverSchemas');
 const moment = require('moment');
-// index behavior recommended to be turned off for production, as index creation can have performance impact. turn off with autoIndex false.
-// e.g. mongoose.connect('mongodb://user:pass@localhost:port/database', { autoIndex: false });
-mongoose.connect('mongodb://localhost/sdc_q_a', {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false});
 // the schemas below doesn't work (next is not defined), but shows that maxTimeMS works
 // schemas.newQuestionSchema.pre('aggregate', function(next) {
 //   this._startTime = Date.now();
@@ -13,6 +10,12 @@ mongoose.connect('mongodb://localhost/sdc_q_a', {useNewUrlParser: true, useUnifi
 //     console.log('Runtime in MS: ', Date.now() - this._startTime);
 //   }
 // });
+
+// index behavior recommended to be turned off for production, as index creation can have performance impact. turn off with autoIndex false.
+// e.g. mongoose.connect('mongodb://user:pass@localhost:port/database', { autoIndex: false });
+// mongoose.connect('mongodb://localhost/sdc_q_a', {useNewUrlParser: true, useUnifiedTopology:
+// true, useCreateIndex: true, useFindAndModify: false});
+mongoose.connect('mongodb://3.141.11.183/sdc_q_a', {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false});
 
 const Question = mongoose.model('Question', schemas.newQuestionSchema,
 'questions');
