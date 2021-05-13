@@ -84,7 +84,6 @@ app.post('/questions/:question_id/answers', (req, res) => {
       console.log(err);
       res.status(500).end();
     });
-  res.end();
 });
 
 app.put('/questions/:question_id/helpful', (req, res) => {
