@@ -5,6 +5,8 @@ WORKDIR ~/
 COPY . .
 # WORKDIR /Questions-Api
 RUN npm ci
+ARG hostname
+ENV HOST=${hostname}
 EXPOSE 3001
 CMD ["node", "./server/index.js"]
 # RUN mkdir /Questions-Api
