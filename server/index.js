@@ -105,7 +105,6 @@ app.put('/questions/:question_id/report', (req, res) => {
     .catch((err)=>{
       res.status(500).send();
     })
-  res.end();
 });
 // add 1 to helpfulness counter: helpA
 app.put('/answers/:answer_id/helpful', (req, res) => {
