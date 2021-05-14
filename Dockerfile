@@ -10,9 +10,7 @@ ARG username
 ARG password
 ENV HOST=${hostname}
 ENV USER1=${username}
-ENV PWD=${password}}
-ARG username
-ARG password
+ENV PWD=${password}
 EXPOSE 3001
 CMD ["node", "./server/index.js"]
 # RUN mkdir /Questions-Api
