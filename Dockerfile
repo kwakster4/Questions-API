@@ -6,7 +6,13 @@ COPY . .
 # WORKDIR /Questions-Api
 RUN npm ci
 ARG hostname
+ARG username
+ARG password
 ENV HOST=${hostname}
+ENV USER1=${username}
+ENV PWD=${password}}
+ARG username
+ARG password
 EXPOSE 3001
 CMD ["node", "./server/index.js"]
 # RUN mkdir /Questions-Api
