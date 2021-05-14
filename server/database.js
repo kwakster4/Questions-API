@@ -20,7 +20,6 @@ mongoose.connect(`mongodb://${process.env.USER1}:${process.env.PWD}@${process.en
 // e.g. mongoose.connect('mongodb://user:pass@localhost:port/database', { autoIndex: false });
 // mongoose.connect('mongodb://localhost/sdc_q_a', {useNewUrlParser: true, useUnifiedTopology:
 // true, useCreateIndex: true, useFindAndModify: false});
-mongoose.connect('mongodb://3.141.11.183/sdc_q_a', {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false});
 
 const Question = mongoose.model('Question', schemas.newQuestionSchema,
 'questions');
