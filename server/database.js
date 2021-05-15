@@ -34,7 +34,7 @@ const getQs = function(product_id, page, count) {
 
   // the below comment works only if the question has an answer
   // return Question.aggregate([{$match: {$and: [{reported: {$ne:1 }}, {'product_id': product_id}]}}, {$unwind: '$answers'}, {$match: {'answers.reported': {$ne: 1}}}, {$group: {_id:'$id', answers: {$push: '$answers'}, question_body: {$first: '$body'}, 'question_date': {$first: '$date_written'}, 'asker_name':{$first:'$asker_name'}, 'question_helpfulness':{$first:'$helpful'}}}, {$limit: count}]).option({maxTimeMS: 50, allowDiskUse: true})
-  return Question.aggregate([{$match: {$and: [{reported: {$ne:1 }}, {'product_id': product_id}]}}, {$limit: count}]).option({maxTimeMS: 50, allowDiskUse: true})
+  return Question.aggregate([{$match: {$and: [{reported: {$ne:1 }}, {'product_id': product_id}]}}, {$limit: count}]).option(allowDiskUse: true})
     .then((questions)=>{
       questions = questions.map((question)=> {
         let answers = question.answers.filter((answer)=>{
@@ -79,7 +79,7 @@ const getQs = function(product_id, page, count) {
 const setQ = function(newQ) {
   let currentTime = moment().format('YYYY-MM-DD');
   newQ.date_written = currentTime;
-  return MaxId.findOneAndUpdate({for: 'questions'}, {$inc: {'maxId': 1}}).maxTimeMS(50)
+  return MaxId.findOneAndUpdate({for: 'questions'}, {$inc: {'maxId': 1}})
     .then((id)=>{
       newQ.id = id.maxId + 1;
       return Question.create(newQ);
@@ -93,7 +93,7 @@ const setQ = function(newQ) {
 
 const getAs = function(question_id, page, count) {
   // get all non-reported Answers for that product
-  return Question.aggregate([{$match: {id: question_id}}, {$unwind: '$answers'}, {$match: {'answers.reported': {$ne: 1}}}, {$project: {'answers':1, _id:0}}, {$limit: count}]).option({maxTimeMS: 50, allowDiskUse: true})
+  return Question.aggregate([{$match: {id: question_id}}, {$unwind: '$answers'}, {$match: {'answers.reported': {$ne: 1}}}, {$project: {'answers':1, _id:0}}, {$limit: count}]).option(allowDiskUse: true})
     .then((answers)=>{
       return answers.map((answer)=>{
         answer = answer.answers;
@@ -115,25 +115,25 @@ const getAs = function(question_id, page, count) {
 const setA = function(question_id, newA) {
   let currentTime = moment().format('YYYY-MM-DD');
   newA.date_written = currentTime;
-  return MaxId.findOneAndUpdate({for: 'answers'}, {$inc: {'maxId': 1}}).maxTimeMS(50)
+  return MaxId.findOneAndUpdate({for: 'answers'}, {$inc: {'maxId': 1}});
     .then((id)=>{
       newA.id = id.maxId + 1;
-      return Question.updateOne({id: question_id}, {$push: {answers: newA}}).maxTimeMS(50);
+      return Question.updateOne({id: question_id}, {$push: {answers: newA}});
     })
 };
 
 const helpQ = function(question_id) {
   // access and change helpfulness of question.
-  return Question.updateOne({id: question_id}, {$inc:{'helpful': 1}}).maxTimeMS(50);
+  return Question.updateOne({id: question_id}, {$inc:{'helpful': 1}});
 };
 
 const reportQ = function(question_id) {
-  return Question.updateOne({id: question_id}, {$set:{'reported': 1}}).maxTimeMS(50);
+  return Question.updateOne({id: question_id}, {$set:{'reported': 1}});
 };
 
 const helpA = function(answer_id) {
   // may also get away with Question.update({answer.id: answer_id}, {$inc:{'answers.$.helpfulness':1}}), bc listed as index on mongo database
-  return Question.updateOne({'answers.id': answer_id}, {$inc:{'answers.$.helpful': 1}}).maxTimeMS(50);
+  return Question.updateOne({'answers.id': answer_id}, {$inc:{'answers.$.helpful': 1}});
   // Answer.findOne({id: answer_id}).select('question_id')
   //   .then((id)=>{
   //     return id.question_id;
@@ -147,7 +147,7 @@ const helpA = function(answer_id) {
 };
 
 const reportA = function(answer_id) {
-  return Question.updateOne({'answers.id': answer_id}, {$set:{'answers.$.reported': 1}}).maxTimeMS(50);
+  return Question.updateOne({'answers.id': answer_id}, {$set:{'answers.$.reported': 1}});
   // Answer.findOne({id: answer_id}).select('question_id')
   //   .then((id)=>{
   //     return id.question_id;
