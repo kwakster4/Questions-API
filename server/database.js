@@ -34,7 +34,7 @@ const getQs = function(product_id, page, count) {
 
   // the below comment works only if the question has an answer
   // return Question.aggregate([{$match: {$and: [{reported: {$ne:1 }}, {'product_id': product_id}]}}, {$unwind: '$answers'}, {$match: {'answers.reported': {$ne: 1}}}, {$group: {_id:'$id', answers: {$push: '$answers'}, question_body: {$first: '$body'}, 'question_date': {$first: '$date_written'}, 'asker_name':{$first:'$asker_name'}, 'question_helpfulness':{$first:'$helpful'}}}, {$limit: count}]).option({maxTimeMS: 50, allowDiskUse: true})
-  return Question.aggregate([{$match: {$and: [{reported: {$ne:1 }}, {'product_id': product_id}]}}, {$limit: count}]).option(allowDiskUse: true})
+  return Question.aggregate([{$match: {$and: [{reported: {$ne:1 }}, {'product_id': product_id}]}}, {$limit: count}]).option({allowDiskUse: true})
     .then((questions)=>{
       questions = questions.map((question)=> {
         let answers = question.answers.filter((answer)=>{
@@ -93,7 +93,7 @@ const setQ = function(newQ) {
 
 const getAs = function(question_id, page, count) {
   // get all non-reported Answers for that product
-  return Question.aggregate([{$match: {id: question_id}}, {$unwind: '$answers'}, {$match: {'answers.reported': {$ne: 1}}}, {$project: {'answers':1, _id:0}}, {$limit: count}]).option(allowDiskUse: true})
+  return Question.aggregate([{$match: {id: question_id}}, {$unwind: '$answers'}, {$match: {'answers.reported': {$ne: 1}}}, {$project: {'answers':1, _id:0}}, {$limit: count}]).option({allowDiskUse: true})
     .then((answers)=>{
       return answers.map((answer)=>{
         answer = answer.answers;
