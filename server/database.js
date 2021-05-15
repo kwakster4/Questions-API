@@ -115,7 +115,7 @@ const getAs = function(question_id, page, count) {
 const setA = function(question_id, newA) {
   let currentTime = moment().format('YYYY-MM-DD');
   newA.date_written = currentTime;
-  return MaxId.findOneAndUpdate({for: 'answers'}, {$inc: {'maxId': 1}});
+  return MaxId.findOneAndUpdate({for: 'answers'}, {$inc: {'maxId': 1}})
     .then((id)=>{
       newA.id = id.maxId + 1;
       return Question.updateOne({id: question_id}, {$push: {answers: newA}});
